@@ -1,8 +1,8 @@
 # Seance
 
 [![live](https://img.shields.io/badge/live-online-22c55e)](https://drsamonline.github.io/seance/)
-[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![download](https://img.shields.io/github/v/release/drsamonline/seance?label=download&color=22c55e)](https://github.com/drsamonline/seance/releases/latest)
+[![license](https://img.shields.io/badge/license-PolyForm Noncommercial-blue)](LICENSE)
+[![download](https://img.shields.io/github/v/release/drsamonline/seance
 
 **Sealed notes, opened once.** Write a note, seal it with a passphrase, and share
 the sealed text. It opens on the reader's device — offline, no account — and the
