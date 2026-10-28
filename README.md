@@ -7,7 +7,7 @@
 <!-- shot:end -->
 
 [![live](https://img.shields.io/badge/live-online-22c55e)](https://drsamonline.github.io/seance/)
-[![license](https://img.shields.io/badge/license-PolyForm Noncommercial-blue)](LICENSE)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 [![download](https://img.shields.io/github/v/release/drsamonline/seance
 
 **Sealed notes, opened once.** Write a note, seal it with a passphrase, and share
