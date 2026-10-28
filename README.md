@@ -35,7 +35,6 @@ fine; some browsers restrict `file://`.)
 ```
 docs/index.html      the app
 docs/web-kit.js      the shared runtime (drsamonline/web-kit)
-docs/crypto-kit.js   the crypto core   (drsamonline/crypto-kit)
 ```
 
 ## Honest limits
