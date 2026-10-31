@@ -4,220 +4,133 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Seance — sealed notes, opened once</title>
+<meta name="description" content="Seal a note with a passphrase. It opens once, on this device, offline. No account, no server.">
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
+  /* Sealed. Not a dashboard and not a document: ink on near-black, a violet wax
+     seal, monospace markings. Deliberately shares nothing with the other apps -
+     the palette, the type and the shape language are all this app's own. */
+  :root{
+    --void:#08070e; --ink:#eae6f8; --dim:#9b93bf; --line:#241f3d;
+    --seal:#8b7cf6; --seal-deep:#6d5ce0; --paper:#141127;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --void:#f7f5fc; --ink:#16122c; --dim:#5d5580; --line:#e2dcf2;
+      --seal:#5b46d6; --seal-deep:#4a37c4; --paper:#ffffff;
+    }
+  }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header,main,footer{max-width:680px;margin:0 auto;padding:20px}
-  h1{margin:0;font-size:22px}
-  .mut{color:var(--mut)}
-  .tabs{display:flex;gap:8px;margin:14px 0}
-  .tab{flex:1;text-align:center;padding:10px;border-radius:10px;border:1px solid var(--line);cursor:pointer;background:transparent;color:var(--ink)}
-  .tab.on{background:var(--card);border-color:var(--acc)}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0}
-  label{display:block;font-size:13px;color:var(--mut);margin:8px 0 4px}
-  textarea,input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0d1014;color:var(--ink);font-size:15px;font-family:inherit}
-  textarea{min-height:110px;resize:vertical}
-  button{background:var(--acc);color:#06210f;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;margin-top:10px}
-  .ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  .out{white-space:pre-wrap;word-break:break-all;background:#0d1014;border:1px dashed var(--line);border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
-  .hidden{display:none}
-  .warn{color:#f59e0b}
+  body{
+    margin:0; background:var(--void); color:var(--ink);
+    font:17px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-image:
+      radial-gradient(760px 340px at 50% -180px, color-mix(in srgb, var(--seal) 26%, transparent), transparent 72%);
+    background-repeat:no-repeat;
+  }
+  .wrap{max-width:600px; margin:0 auto; padding:46px 22px 80px}
+  .crumb{font:11.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+         letter-spacing:.16em; text-transform:uppercase; color:var(--dim); text-decoration:none}
+  .crumb:hover{color:var(--seal)}
+
+  /* the seal */
+  .seal{width:74px;height:74px;border-radius:50%;margin:26px 0 18px;position:relative;
+        background:radial-gradient(circle at 34% 30%, var(--seal), var(--seal-deep) 72%);
+        box-shadow:0 0 0 1px color-mix(in srgb, var(--seal) 40%, transparent),
+                   0 18px 44px -18px var(--seal);}
+  .seal::before{content:"";position:absolute;inset:13px;border-radius:50%;
+                border:1.5px solid color-mix(in srgb, #fff 55%, transparent)}
+  .seal::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:26px;
+               transform:translate(-50%,-50%);
+               border:2px solid #fff;border-radius:3px;
+               background:linear-gradient(#fff,#fff) center 6px/10px 2px no-repeat,
+                          linear-gradient(#fff,#fff) center 12px/10px 2px no-repeat;}
+
+  h1{font-size:clamp(2rem,5.6vw,2.9rem); line-height:1.06; letter-spacing:-.025em;
+     margin:0 0 12px; font-weight:650}
+  h1 span{color:var(--seal)}
+  .lede{color:var(--dim); font-size:1.06rem; margin:0 0 26px; max-width:44ch}
+
+  .cta{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .go{font:600 15.5px/1 ui-sans-serif, system-ui, sans-serif; text-decoration:none;
+      color:#0a0714; background:var(--seal); padding:15px 22px; border-radius:999px;
+      box-shadow:0 14px 34px -14px var(--seal)}
+  .go:hover{background:var(--seal-deep); color:#fff}
+  .alt{font:13px/1 ui-monospace, Menlo, monospace; letter-spacing:.1em;
+       text-transform:uppercase; color:var(--dim); text-decoration:none}
+  .alt:hover{color:var(--ink)}
+
+  .shot{margin:36px 0 0; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+        background:var(--paper); box-shadow:0 30px 70px -40px #000}
+  .shot img{display:block; width:100%; height:auto}
+  .cap{font:11.5px/1.6 ui-monospace, Menlo, monospace; letter-spacing:.06em;
+       color:var(--dim); text-align:center; margin:12px 0 0; text-transform:uppercase}
+
+  h2{font:600 11.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+     letter-spacing:.18em; text-transform:uppercase; color:var(--dim);
+     margin:44px 0 14px}
+  ol.steps{list-style:none; counter-reset:s; padding:0; margin:0}
+  ol.steps li{counter-increment:s; position:relative; padding:0 0 16px 46px;
+              border-left:1px solid var(--line); margin-left:14px}
+  ol.steps li:last-child{border-left-color:transparent; padding-bottom:0}
+  ol.steps li::before{content:counter(s); position:absolute; left:-14px; top:-2px;
+     width:27px; height:27px; border-radius:50%; display:grid; place-items:center;
+     font:700 12px/1 ui-monospace, Menlo, monospace; color:var(--seal);
+     background:var(--void); border:1px solid var(--seal)}
+  ol.steps b{display:block; font-weight:650}
+  ol.steps span{color:var(--dim); font-size:14.5px}
+
+  .dl{display:flex; gap:8px; flex-wrap:wrap}
+  .dl a{font:600 13px/1 ui-monospace, Menlo, monospace; letter-spacing:.04em;
+        text-decoration:none; color:var(--ink); border:1px solid var(--line);
+        border-radius:12px; padding:11px 14px; background:var(--paper)}
+  .dl a:hover{border-color:var(--seal); color:var(--seal)}
+  .dl small{display:block; font-weight:400; color:var(--dim); margin-top:4px; font-size:11px}
+
+  footer{margin-top:44px; padding-top:16px; border-top:1px solid var(--line);
+         font:11.5px/1.7 ui-monospace, Menlo, monospace; letter-spacing:.05em;
+         color:var(--dim); text-transform:uppercase}
+  footer a{color:var(--seal); text-decoration:none}
 </style>
 </head>
 <body>
-<header>
-  <h1>Seance</h1>
-  <p class="mut">Seal a note with a passphrase. It opens <b>once</b>, on this device, offline.</p>
-</header>
-<main>
-  <div class="tabs">
-    <button class="tab on" id="tab-seal">Seal</button>
-    <button class="tab" id="tab-open">Open</button>
+<div class="wrap">
+  <a class="crumb" href="https://drsamonline.github.io/">← all projects</a>
+
+  <div class="seal" aria-hidden="true"></div>
+
+  <h1>Say it once.<br>Then it is <span>sealed</span>.</h1>
+  <p class="lede">Write a note, lock it with a passphrase, and hand it over. It opens once —
+     on the reader's device, offline. No account, no server, nothing to intercept.</p>
+
+  <div class="cta">
+    <a class="go" href="app.html">Seal a note →</a>
+    <a class="alt" href="#download">install</a>
   </div>
 
-  <section id="pane-seal" class="card">
-    <label for="s-text">Your note</label>
-    <textarea id="s-text" placeholder="Something to say once…"></textarea>
-    <label for="s-pass">Passphrase (share it separately)</label>
-    <input id="s-pass" type="password" placeholder="a strong passphrase">
-    <div class="row">
-      <button id="seal">Seal it</button>
-      <button id="s-copy" class="ghost hidden">Copy sealed text</button>
-      <button id="s-clear" class="ghost">Clear</button>
-    </div>
-    <div id="s-out" class="out hidden"></div>
-    <p class="mut" id="s-status"></p>
-  </section>
-
-  <section id="pane-open" class="card hidden">
-    <label for="o-text">Sealed text</label>
-    <textarea id="o-text" placeholder="paste the sealed text here"></textarea>
-    <label for="o-pass">Passphrase</label>
-    <input id="o-pass" type="password" placeholder="the passphrase">
-    <div class="row">
-      <button id="open">Open it</button>
-      <button id="o-clear" class="ghost">Clear</button>
-    </div>
-    <div id="o-out" class="out hidden"></div>
-    <p class="mut" id="o-status"></p>
-    <p class="warn" id="o-once" hidden>This device has already opened a sealed note once.</p>
-  </section>
-
-  <div class="row" style="margin-top:10px">
-    <button id="theme" class="ghost" type="button">Theme</button>
-    <button id="lang" class="ghost" type="button">Language</button>
+  <div class="shot">
+    <img src="shot.png" alt="Seance: seal a note with a passphrase, or open one you were given" width="1200" height="900">
   </div>
-</main>
-<!-- download:start -->
-<section style="max-width:620px;margin:30px auto 0;padding:16px 18px;border:1px solid rgba(128,128,128,.35);border-radius:14px;font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
-  <p style="margin:0 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65;font-weight:700">Download</p>
-  <p style="display:flex;gap:8px;flex-wrap:wrap;margin:0"><a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance.apk" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;background:#22c55e;color:#06210f;">Android APK · 694 KB</a><a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance-portable.exe" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;background:#22c55e;color:#06210f;">Windows EXE · 8.5 MB</a><a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance-linux" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid rgba(128,128,128,.45);color:inherit;">Linux · 20.8 MB</a></p>
-  <p style="margin:10px 0 0;font-size:12.5px;opacity:.65">From the latest release · free · no account, no telemetry.</p>
-</section>
-<!-- download:end -->
-<footer class="mut">Built with crypto-kit + web-kit · offline, no accounts · © 2026 Dr Sohil Momin</footer>
+  <p class="cap">AES-256-GCM · the passphrase never leaves your device</p>
 
-<script src="web-kit.js"></script>
-<script>
-  Loom.theme.apply();
-  Loom.seo.title("Seance — sealed notes, opened once");
-  Loom.seo.description("Seal a note with a passphrase; it opens once, offline, on this device. Built with crypto-kit.");
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><b>Write the note</b><span>Whatever must be said once. It never leaves the browser.</span></li>
+    <li><b>Choose a passphrase</b><span>Share it separately, through a different channel than the note.</span></li>
+    <li><b>Send the sealed text</b><span>The reader opens it once. The second attempt finds nothing.</span></li>
+  </ol>
 
-  var $ = function (id) { return document.getElementById(id); };
-  function show(id, on) { $(id).classList.toggle("hidden", !on); }
+  <h2 id="download">Install</h2>
+  <p class="dl">
+    <a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance.apk">Android<small>APK · 694 KB</small></a>
+    <a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance-portable.exe">Windows<small>EXE · 8.5 MB</small></a>
+    <a href="https://github.com/drsamonline/seance/releases/download/app-latest/seance-linux">Linux<small>binary · 20.8 MB</small></a>
+  </p>
 
-  // tabs
-  $("tab-seal").onclick = function () { $("tab-seal").classList.add("on"); $("tab-open").classList.remove("on"); show("pane-seal", true); show("pane-open", false); };
-  $("tab-open").onclick = function () { $("tab-open").classList.add("on"); $("tab-seal").classList.remove("on"); show("pane-open", true); show("pane-seal", false); };
-
-  // seal
-  $("seal").onclick = function () {
-    var text = $("s-text").value, pass = $("s-pass").value;
-    if (!text || !pass) { $("s-status").textContent = "Write a note and a passphrase."; return; }
-    $("s-status").textContent = "Sealing…";
-    CryptoKit.sealString(text, pass).then(function (b64) {
-      $("s-out").textContent = b64; show("s-out", true); show("s-copy", true);
-      $("s-status").textContent = "Sealed. Share the text and the passphrase separately.";
-    }).catch(function (e) { $("s-status").textContent = "Could not seal: " + e.message; });
-  };
-  $("s-copy").onclick = function () {
-    navigator.clipboard && navigator.clipboard.writeText($("s-out").textContent).then(function () { $("s-status").textContent = "Copied."; });
-  };
-  $("s-clear").onclick = function () { $("s-text").value = ""; $("s-pass").value = ""; $("s-out").textContent = ""; show("s-out", false); show("s-copy", false); $("s-status").textContent = ""; };
-
-  // open
-  var used = Loom.storage.get("opened", false);
-  show("o-once", used);
-  $("open").onclick = function () {
-    var b64 = $("o-text").value.trim(), pass = $("o-pass").value;
-    if (!b64 || !pass) { $("o-status").textContent = "Paste the sealed text and the passphrase."; return; }
-    $("o-status").textContent = "Opening…";
-    CryptoKit.openString(b64, pass).then(function (text) {
-      $("o-out").textContent = text; show("o-out", true);
-      $("o-status").textContent = "Opened.";
-      Loom.storage.set("opened", true); show("o-once", true);
-    }).catch(function () {
-      $("o-status").textContent = "Could not open — wrong passphrase, or the text was altered.";
-    });
-  };
-  $("o-clear").onclick = function () { $("o-text").value = ""; $("o-pass").value = ""; $("o-out").textContent = ""; show("o-out", false); $("o-status").textContent = ""; };
-
-  // chrome
-  $("theme").onclick = function () { Loom.theme.toggle(); };
-  $("lang").onclick = function () { var L = Loom.i18n.langs(); Loom.i18n.setLang(L[(L.indexOf(Loom.i18n.lang) + 1) % L.length]); };
-</script>
-
-<style>:focus-visible{outline:2px solid currentColor;outline-offset:2px}</style>
-<script>
-/* THE FOUR THINGS EVERY APP HERE SHOULD HAVE: export, restore, undo, keyboard.
-   Hooked at what every app shares - localStorage and document - not at each app's internals,
-   so none of them can silently do nothing. */
-(function () {
-  function typing(e) { var t = e.target || {}; return /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable === true; }
-  function say(m) { var d = document.createElement("div"); d.textContent = m; d.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:#111;color:#eee;border:1px solid #444;border-radius:8px;padding:8px 14px;font:13px system-ui;z-index:10000"; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 1700); }
-  window.__exportAll = function () {
-    var out = { app: document.title, exported: new Date().toISOString(), storage: {} };
-    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("__") !== 0) out.storage[k] = localStorage.getItem(k); } } catch (e) { out.storageError = String(e); }
-    var name = (document.title || "app").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-data-" + new Date().toISOString().slice(0, 10) + ".json";
-    var json = JSON.stringify(out, null, 2);
-    if (window.Export && typeof Export.save === "function") Export.save(name, json, "application/json");
-    else { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([json], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
-    return name;
-  };
-  window.__importAll = function () {
-    var inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json,application/json";
-    inp.onchange = function () {
-      var f = inp.files && inp.files[0]; if (!f) return;
-      var r = new FileReader();
-      r.onload = function () {
-        var data; try { data = JSON.parse(String(r.result)); } catch (e) { alert("That is not a JSON backup."); return; }
-        var store = data && (data.storage || data.localStorage || data);
-        if (!store || typeof store !== "object") { alert("No stored data found in that file."); return; }
-        var keys = Object.keys(store); if (!keys.length) { alert("That backup is empty."); return; }
-        if (!confirm("This backup has " + keys.length + " item(s).\n\nRESTORE THEM? This replaces what this app has stored now.")) return;
-        keys.forEach(function (k) { var v = store[k]; localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v)); });
-        alert("Restored " + keys.length + " item(s). Reloading."); location.reload();
-      };
-      r.readAsText(f);
-    };
-    inp.click();
-  };
-  var history = [], orig = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function (k, v) {
-    try { var prev = localStorage.getItem(k); if (prev !== String(v) && String(k).indexOf("__") !== 0) { history.push({ k: k, prev: prev }); if (history.length > 60) history.shift(); } } catch (e) {}
-    return orig(k, v);
-  };
-  window.__undo = function () {
-    var h = history.pop(); if (!h) { say("Nothing to undo"); return false; }
-    try { if (h.prev === null) localStorage.removeItem(h.k); else orig(h.k, h.prev); } catch (e) { say("Could not undo"); return false; }
-    say("Undone. Reloading."); setTimeout(function () { location.reload(); }, 350); return true;
-  };
-  function overlay() {
-    var old = document.getElementById("__keysHelp"); if (old) { old.remove(); return; }
-    var b = document.createElement("div"); b.id = "__keysHelp";
-    b.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10001;display:flex;align-items:center;justify-content:center;font:14px system-ui;color:#eee";
-    b.innerHTML = '<div style="background:#15181f;border:1px solid #333;border-radius:12px;padding:20px 24px;max-width:360px"><div style="font-weight:700;margin-bottom:10px">Keyboard</div><div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px"><kbd style="background:#222;border-radius:4px;padding:1px 6px">/</kbd><span>focus search</span><kbd style="background:#222;border-radius:4px;padding:1px 6px">?</kbd><span>this list</span><kbd style="background:#222;border-radius:4px;padding:1px 6px">Esc</kbd><span>leave a field</span><kbd style="background:#222;border-radius:4px;padding:1px 6px">Ctrl Z</kbd><span>undo</span></div></div>';
-    b.onclick = function () { b.remove(); }; document.body.appendChild(b);
-  }
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { if (typing(e)) e.target.blur(); var b = document.getElementById("__keysHelp"); if (b) b.remove(); return; }
-    if (e.ctrlKey || e.metaKey || e.altKey) { if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === "z" && !typing(e)) { e.preventDefault(); window.__undo(); } return; }
-    if (typing(e)) return;
-    if (e.key === "/") { var s = document.querySelector('input[type="search"], input[placeholder*="search" i], input[id*="search" i], input[type="text"]'); if (s) { e.preventDefault(); s.focus(); if (s.select) s.select(); } return; }
-    if (e.key === "?") { e.preventDefault(); overlay(); }
-  });
-  function add() {
-    if (!document.body || document.getElementById("__tools")) return;
-    var wrap = document.createElement("div"); wrap.id = "__tools";
-    wrap.style.cssText = "position:fixed;left:10px;bottom:10px;z-index:9998;display:flex;gap:6px;flex-wrap:wrap;max-width:70vw";
-    [["Save my data", window.__exportAll], ["Restore", window.__importAll], ["Undo", window.__undo], ["?", overlay]].forEach(function (b) {
-      var el = document.createElement("button"); el.textContent = b[0];
-      el.style.cssText = "background:#111;color:#eee;border:1px solid #444;border-radius:8px;padding:6px 10px;font:12px system-ui;cursor:pointer;opacity:.75";
-      el.onclick = b[1]; wrap.appendChild(el);
-    });
-    document.body.appendChild(wrap);
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", add); else add();
-})();
-</script>
-
-<script>
-window.__smokeTest = function () {
-  var out = []; function ok(n, c) { out.push((c ? "PASS " : "FAIL ") + n); }
-  ok("the document rendered", !!document.body && document.body.children.length > 0);
-  ok("a heading is present", !!document.querySelector("h1, h2"));
-  ok("no script threw during load", !window.__bootError);
-  var kits = ["Export","Loom","CryptoKit","Case","Search","Srs","Game","Art","Audio","Ml","UI","Lan","Astro"];
-  var found = kits.filter(function (k) { return window[k]; });
-  ok("at least one kit is loaded (" + (found.join(", ") || "none") + ")", found.length > 0);
-  try { localStorage.setItem("__smoke","1"); ok("storage works", localStorage.getItem("__smoke") === "1"); localStorage.removeItem("__smoke"); } catch (e) { ok("storage works", false); }
-  console.log(out.join("\n"));
-  if (location.search.indexOf("test") >= 0) { var d = document.createElement("pre"); d.textContent = out.join("\n"); d.style.cssText = "position:fixed;left:0;right:0;bottom:0;background:#111;color:#eee;padding:12px;font:12px ui-monospace,monospace;z-index:99999;max-height:40vh;overflow:auto;white-space:pre-wrap"; document.body.appendChild(d); }
-  return out;
-};
-window.addEventListener("error", function () { window.__bootError = true; });
-</script>
+  <footer>
+    <a href="https://github.com/drsamonline/seance">Source</a> ·
+    <a href="https://github.com/drsamonline/seance/blob/main/LICENSE">PolyForm Noncommercial 1.0.0</a> ·
+    Dr. Sohil Momin
+  </footer>
+</div>
 </body>
 </html>
