@@ -212,5 +212,69 @@ window.__smokeTest = function () {
 };
 window.addEventListener("error", function () { window.__bootError = true; });
 </script>
+<style id="app-theme">
+  /* Seance's own look: ink on near-black, violet wax, monospace markings.
+     web-kit writes the palette as INLINE styles on <html>, so !important is
+     required - a plain :root rule loses to it. */
+  :root{
+    --bg:#08070e !important; --card:#141127 !important; --ink:#eae6f8 !important;
+    --mut:#9b93bf !important; --line:#241f3d !important; --acc:#8b7cf6 !important;
+  }
+  html,body{
+    background-image:radial-gradient(720px 320px at 50% -160px,
+      color-mix(in srgb,var(--acc) 24%,transparent),transparent 72%) !important;
+    background-repeat:no-repeat !important;background-attachment:fixed !important;
+  }
+  body,button,input,textarea{
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif !important;
+  }
+  h1{letter-spacing:-.025em !important;font-weight:650 !important}
+  /* small labels read like markings on a sealed envelope */
+  .mut,label,.tab{
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace !important;
+    letter-spacing:.1em !important;text-transform:uppercase !important;font-size:11.5px !important;
+  }
+  .card{
+    background:var(--card) !important;border:1px solid var(--line) !important;
+    border-radius:18px !important;
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 12%,transparent),
+               0 30px 70px -46px #000 !important;
+  }
+  .tabs{gap:6px !important}
+  .tab{
+    border-radius:999px !important;border:1px solid var(--line) !important;
+    background:transparent !important;color:var(--mut) !important;padding:9px 15px !important;
+  }
+  .tab.on{
+    background:var(--acc) !important;color:#0a0714 !important;
+    border-color:var(--acc) !important;
+  }
+  textarea,input[type=password],input[type=text]{
+    background:color-mix(in srgb,var(--card) 60%,#000 40%) !important;
+    border:1px solid var(--line) !important;border-radius:14px !important;
+    padding:14px !important;color:var(--ink) !important;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace !important;
+    font-size:14px !important;line-height:1.7 !important;
+  }
+  textarea:focus,input:focus{
+    outline:none !important;border-color:var(--acc) !important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent) !important;
+  }
+  input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--mut) 80%,transparent) !important}
+  button{border-radius:999px !important;font-weight:600 !important}
+  button:not(.ghost):not(.tab){
+    background:var(--acc) !important;color:#0a0714 !important;border:none !important;
+    padding:14px 22px !important;
+    box-shadow:0 14px 34px -14px var(--acc) !important;
+  }
+  button.ghost{
+    background:transparent !important;color:var(--mut) !important;
+    border:1px solid var(--line) !important;
+  }
+  button.ghost:hover{color:var(--ink) !important;border-color:var(--acc) !important}
+  .warn{color:#f59e0b !important}
+  .out{border-radius:14px !important;border:1px solid var(--line) !important}
+</style>
 </body>
+
 </html>
