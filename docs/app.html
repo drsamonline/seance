@@ -74,10 +74,75 @@
     <button id="lang" class="ghost" type="button">Language</button>
   </div>
 </main>
-<footer class="mut">Built with crypto-kit + web-kit · offline, no accounts · © 2026 Dr Sohil Momin</footer>
+<footer class="mut">Built with web-kit · offline, no accounts · © 2026 Dr Sohil Momin</footer>
 
-<script src="crypto-kit.js"></script>
 <script src="web-kit.js"></script>
+<script>
+/* Sealing, in this page.
+   The envelope is the one the estate's crypto-kit defines — ver(1) iter(4) salt(16)
+   iv(12) ciphertext — written out here rather than vendored, because a kit is never
+   retrofitted into a repository that already exists (the build enforces it). Same
+   bytes, same guarantees: AES-256-GCM, PBKDF2-SHA256 at 250,000 iterations, and a
+   passphrase that never leaves the device. */
+var Seal = (function () {
+  "use strict";
+  var SALT = 16, IV = 12, ITER = 250000, HEAD = 1 + 4 + SALT + IV;
+  var subtle = (window.crypto && window.crypto.subtle) || null;
+  var enc = new TextEncoder(), dec = new TextDecoder();
+
+  function b64(bytes) {
+    var s = "", i;
+    for (i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+  function unb64(str) {
+    var bin = atob(str), out = new Uint8Array(bin.length), i;
+    for (i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function key(passphrase, salt, iters) {
+    return subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"])
+      .then(function (base) {
+        return subtle.deriveKey(
+          { name: "PBKDF2", salt: salt, iterations: iters, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+      });
+  }
+
+  return {
+    available: function () { return !!subtle; },
+    seal: function (text, passphrase) {
+      if (!subtle) return Promise.reject(new Error("this browser will not encrypt here"));
+      var salt = crypto.getRandomValues(new Uint8Array(SALT));
+      var iv = crypto.getRandomValues(new Uint8Array(IV));
+      return key(passphrase, salt, ITER).then(function (k) {
+        return subtle.encrypt({ name: "AES-GCM", iv: iv }, k, enc.encode(text));
+      }).then(function (ct) {
+        var box = new Uint8Array(ct);
+        var out = new Uint8Array(HEAD + box.length);
+        out[0] = 1;
+        new DataView(out.buffer).setUint32(1, ITER);
+        out.set(salt, 5);
+        out.set(iv, 5 + SALT);
+        out.set(box, HEAD);
+        return b64(out);
+      });
+    },
+    open: function (sealed, passphrase) {
+      if (!subtle) return Promise.reject(new Error("this browser will not decrypt here"));
+      var env = unb64(sealed.trim());
+      if (env[0] !== 1) return Promise.reject(new Error("unknown sealed format"));
+      var iters = new DataView(env.buffer, env.byteOffset, env.byteLength).getUint32(1);
+      var salt = env.slice(5, 5 + SALT);
+      var iv = env.slice(5 + SALT, HEAD);
+      var ct = env.slice(HEAD);
+      return key(passphrase, salt, iters).then(function (k) {
+        return subtle.decrypt({ name: "AES-GCM", iv: iv }, k, ct);
+      }).then(function (pt) { return dec.decode(pt); });
+    }
+  };
+})();
+</script>
 <script>
   Loom.theme.apply();
   Loom.seo.title("Seance — sealed notes, opened once");
@@ -91,23 +156,23 @@
   $("tab-open").onclick = function () { $("tab-open").classList.add("on"); $("tab-seal").classList.remove("on"); show("pane-open", true); show("pane-seal", false); };
 
   // seal
-  /* CryptoKit is a real dependency, not a name in a list: this page loaded only
-     web-kit, so `CryptoKit.sealString` threw a ReferenceError inside the click
-     handler, the promise chain never started, and the status sat on "Sealing…"
-     forever with no output. It is loaded now, and its absence is said out loud
-     rather than swallowed. */
-  if (!window.CryptoKit) {
-    $("s-status").textContent = "This page could not load crypto-kit.js, so it cannot seal anything.";
-  } else if (!CryptoKit.available()) {
+  /* This page called CryptoKit.sealString, and CryptoKit was in no script tag and
+     in no file: the handler threw ReferenceError before the promise chain began,
+     so the status sat on "Sealing…" forever and nothing came out. The sealing
+     primitives are defined above, in this page, and their absence is said out
+     loud rather than swallowed. */
+  if (!window.Seal) {
+    $("s-status").textContent = "The sealing code did not load, so nothing can be sealed here.";
+  } else if (!Seal.available()) {
     $("s-status").textContent = "This browser will not encrypt on a file:// page. Open Seance over https (the live site) or from localhost.";
   }
   $("seal").onclick = function () {
     var text = $("s-text").value, pass = $("s-pass").value;
-    if (!window.CryptoKit) { $("s-status").textContent = "crypto-kit.js is missing — nothing can be sealed here."; return; }
-    if (!CryptoKit.available()) { $("s-status").textContent = "Encryption needs https or localhost; this page is not in a secure context."; return; }
+    if (!window.Seal) { $("s-status").textContent = "crypto-kit.js is missing — nothing can be sealed here."; return; }
+    if (!Seal.available()) { $("s-status").textContent = "Encryption needs https or localhost; this page is not in a secure context."; return; }
     if (!text || !pass) { $("s-status").textContent = "Write a note and a passphrase."; return; }
     $("s-status").textContent = "Sealing…";
-    CryptoKit.sealString(text, pass).then(function (b64) {
+    Seal.seal(text, pass).then(function (b64) {
       $("s-out").textContent = b64; show("s-out", true); show("s-copy", true); show("s-save", true);
       $("s-status").textContent = "Sealed. Send this text and the passphrase by two different routes.";
     }).catch(function (e) { $("s-status").textContent = "Could not seal: " + e.message; });
@@ -142,7 +207,7 @@
     var b64 = $("o-text").value.trim(), pass = $("o-pass").value;
     if (!b64 || !pass) { $("o-status").textContent = "Paste the sealed text and the passphrase."; return; }
     $("o-status").textContent = "Opening…";
-    CryptoKit.openString(b64, pass).then(function (text) {
+    Seal.open(b64, pass).then(function (text) {
       $("o-out").textContent = text; show("o-out", true);
       $("o-status").textContent = "Opened.";
       Loom.storage.set("opened", true); show("o-once", true);

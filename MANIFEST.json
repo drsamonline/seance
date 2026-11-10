@@ -21,10 +21,10 @@
       "at": "2026-11-04T20:08:19Z"
     },
     "CHANGELOG.md": {
-      "sha": "1a01fabc6d8ef986ddbeea7cae777830c345a093",
+      "sha": "33e22e8255d7b0b64c27184b698379ce4caef801",
       "producer": "audit-2026-11-10",
       "class": "agent",
-      "at": "2026-11-10T14:06:20Z"
+      "at": "2026-11-10T14:10:11Z"
     },
     "VERSION": {
       "sha": "9084fa2f716a7117829f3f32a5f4cef400e02903",
@@ -33,10 +33,10 @@
       "at": "2026-11-10T14:06:20Z"
     },
     "docs/app.html": {
-      "sha": "196492b4905261dea4dbe2dc2d46b6dde9c2294d",
+      "sha": "719b9fb2533c204e8433ffa751254cbd0ee2e020",
       "producer": "audit-2026-11-10",
       "class": "agent",
-      "at": "2026-11-10T14:06:20Z"
+      "at": "2026-11-10T14:10:11Z"
     },
     "docs/crypto-kit.js": {
       "sha": "de37be87b56e85f2ddf0dfb5289cee2e3ef7e55e",
@@ -45,11 +45,11 @@
       "at": "2026-11-10T14:06:20Z"
     },
     "docs/shot.png": {
-      "sha": "d432b8d2e6ecf9d274185f830072af2d31267e18",
-      "producer": "screenshot: cdp capture of the running app",
+      "sha": "d7944f9a24646bc0d298254a744a32367a5883ce",
+      "producer": "cdp capture",
       "class": "generated",
-      "at": "2026-11-10T14:06:20Z"
+      "at": "2026-11-10T14:10:11Z"
     }
   },
-  "updated": "2026-11-10T14:06:20Z"
+  "updated": "2026-11-10T14:10:11Z"
 }

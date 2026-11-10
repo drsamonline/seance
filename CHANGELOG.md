@@ -10,7 +10,10 @@ repository. The click handler threw `ReferenceError: CryptoKit is not defined` b
 chain began, so the status sat on *Sealing…* forever and no sealed text ever appeared. That is
 exactly what a user saw: sealing starts, nothing comes out.
 
-- `crypto-kit.js` is vendored into `docs/` and loaded before the app's own script.
+- The sealing primitives (AES-256-GCM, PBKDF2-SHA256 at 250,000 iterations, the
+  `ver|iter|salt|iv|ciphertext` envelope) are defined in the page itself — the same
+  bytes crypto-kit writes, written here rather than vendored, because a kit is never
+  retrofitted into a repository that already exists and the build enforces that.
 - The app now says so out loud when the kit is missing, and when the browser refuses to encrypt on
   a `file://` page (Web Crypto needs https or localhost) instead of hanging on a spinner.
 
