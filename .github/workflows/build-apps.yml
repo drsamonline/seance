@@ -36,11 +36,14 @@ concurrency:
 
 jobs:
   app:
-    uses: drsamonline/app-builder/.github/workflows/build.yml@bbef0db943e11f1a280ac8a063b79e66b7f6d9db   # was @main
+    uses: drsamonline/app-builder/.github/workflows/build.yml@5c94ae32ef2472989e7320a3f8e0969d37c45f3d   # was @main
     with:
       app_name: seance
       app_src: docs
       deploy_path: docs
+      # Seance's app is app.html, not play/. The shot job used to assume /play/ and
+      # captured the 404 page every run, committing it over the README image.
+      shot_url: https://drsamonline.github.io/seance/app.html
     permissions:
       contents: write
       pages: write
