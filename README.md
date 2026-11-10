@@ -10,16 +10,16 @@
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 [![download](https://img.shields.io/github/v/release/drsamonline/seance
 
-**Sealed notes, opened once.** Write a note, seal it with a passphrase, and share
-the sealed text. It opens on the reader's device — offline, no account — and the
-device remembers that it was opened.
+**Sealed notes, opened once.** A message you can send that cannot be read twice: write it,
+seal it with a passphrase, send the sealed text (or the `.txt` it downloads). The reader opens
+it once on their own device — offline, no account — and the second attempt finds nothing.
 
 Built with **crypto-kit** (AES-256-GCM) and **web-kit**.
 
 ## What it does
 
 - **Seal:** a note + a passphrase → a sealed text (base64) you can paste anywhere.
-- **Open:** paste the sealed text + the passphrase → the note.
+- **Open:** paste the sealed text, or open the `.txt` you were sent, + the passphrase → the note.
 - Authenticated encryption, so a wrong passphrase or altered text is rejected.
 - Share the text and the passphrase **separately** — the text is useless alone.
 - Everything happens on your device; nothing is sent anywhere.

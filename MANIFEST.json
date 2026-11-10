@@ -3,23 +3,53 @@
   "locked": false,
   "files": {
     "README.md": {
-      "sha": "1a58a2e5ce1241d949c10c14b7db065c757dd76b",
+      "sha": "1993ff8ea9b31b407abcd24902c683f935769d46",
       "producer": "audit-2026-11-10",
       "class": "agent",
-      "at": "2026-11-10T13:43:45Z"
+      "at": "2026-11-10T14:06:20Z"
     },
     "docs/index.html": {
-      "sha": "86eb47451dd86912f85d80c8a90ce5af8a5b02fa",
+      "sha": "7f1b2261e808d048ad4a3c5ed18ca80120e432f7",
       "producer": "audit-2026-11-10",
       "class": "agent",
-      "at": "2026-11-10T13:43:45Z"
+      "at": "2026-11-10T14:06:20Z"
     },
     ".github/workflows/build-apps.yml": {
       "sha": "de656ad94efe96aff22b079ad5396cf912886aa1",
       "producer": "bootstrap@2026-11-04",
       "class": "canonical",
       "at": "2026-11-04T20:08:19Z"
+    },
+    "CHANGELOG.md": {
+      "sha": "1a01fabc6d8ef986ddbeea7cae777830c345a093",
+      "producer": "audit-2026-11-10",
+      "class": "agent",
+      "at": "2026-11-10T14:06:20Z"
+    },
+    "VERSION": {
+      "sha": "9084fa2f716a7117829f3f32a5f4cef400e02903",
+      "producer": "audit-2026-11-10",
+      "class": "agent",
+      "at": "2026-11-10T14:06:20Z"
+    },
+    "docs/app.html": {
+      "sha": "196492b4905261dea4dbe2dc2d46b6dde9c2294d",
+      "producer": "audit-2026-11-10",
+      "class": "agent",
+      "at": "2026-11-10T14:06:20Z"
+    },
+    "docs/crypto-kit.js": {
+      "sha": "de37be87b56e85f2ddf0dfb5289cee2e3ef7e55e",
+      "producer": "audit-2026-11-10",
+      "class": "agent",
+      "at": "2026-11-10T14:06:20Z"
+    },
+    "docs/shot.png": {
+      "sha": "d432b8d2e6ecf9d274185f830072af2d31267e18",
+      "producer": "screenshot: cdp capture of the running app",
+      "class": "generated",
+      "at": "2026-11-10T14:06:20Z"
     }
   },
-  "updated": "2026-11-10T13:43:45Z"
+  "updated": "2026-11-10T14:06:20Z"
 }

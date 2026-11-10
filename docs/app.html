@@ -29,7 +29,8 @@
 <body>
 <header>
   <h1>Seance</h1>
-  <p class="mut">Seal a note with a passphrase. It opens <b>once</b>, on this device, offline.</p>
+  <p class="mut">Write a note, seal it with a passphrase, and send the sealed text.
+  The reader opens it <b>once</b> — the second attempt finds nothing. No account, no server.</p>
 </header>
 <main>
   <div class="tabs">
@@ -45,6 +46,7 @@
     <div class="row">
       <button id="seal">Seal it</button>
       <button id="s-copy" class="ghost hidden">Copy sealed text</button>
+      <button id="s-save" class="ghost hidden">Download .txt</button>
       <button id="s-clear" class="ghost">Clear</button>
     </div>
     <div id="s-out" class="out hidden"></div>
@@ -54,6 +56,8 @@
   <section id="pane-open" class="card hidden">
     <label for="o-text">Sealed text</label>
     <textarea id="o-text" placeholder="paste the sealed text here"></textarea>
+    <p class="mut" style="margin:6px 0 0">Or open the <code>.txt</code> you were sent:
+      <input id="o-file" type="file" accept=".txt,.seance,text/plain" style="max-width:100%"></p>
     <label for="o-pass">Passphrase</label>
     <input id="o-pass" type="password" placeholder="the passphrase">
     <div class="row">
@@ -72,6 +76,7 @@
 </main>
 <footer class="mut">Built with crypto-kit + web-kit · offline, no accounts · © 2026 Dr Sohil Momin</footer>
 
+<script src="crypto-kit.js"></script>
 <script src="web-kit.js"></script>
 <script>
   Loom.theme.apply();
@@ -86,21 +91,51 @@
   $("tab-open").onclick = function () { $("tab-open").classList.add("on"); $("tab-seal").classList.remove("on"); show("pane-open", true); show("pane-seal", false); };
 
   // seal
+  /* CryptoKit is a real dependency, not a name in a list: this page loaded only
+     web-kit, so `CryptoKit.sealString` threw a ReferenceError inside the click
+     handler, the promise chain never started, and the status sat on "Sealing…"
+     forever with no output. It is loaded now, and its absence is said out loud
+     rather than swallowed. */
+  if (!window.CryptoKit) {
+    $("s-status").textContent = "This page could not load crypto-kit.js, so it cannot seal anything.";
+  } else if (!CryptoKit.available()) {
+    $("s-status").textContent = "This browser will not encrypt on a file:// page. Open Seance over https (the live site) or from localhost.";
+  }
   $("seal").onclick = function () {
     var text = $("s-text").value, pass = $("s-pass").value;
+    if (!window.CryptoKit) { $("s-status").textContent = "crypto-kit.js is missing — nothing can be sealed here."; return; }
+    if (!CryptoKit.available()) { $("s-status").textContent = "Encryption needs https or localhost; this page is not in a secure context."; return; }
     if (!text || !pass) { $("s-status").textContent = "Write a note and a passphrase."; return; }
     $("s-status").textContent = "Sealing…";
     CryptoKit.sealString(text, pass).then(function (b64) {
-      $("s-out").textContent = b64; show("s-out", true); show("s-copy", true);
-      $("s-status").textContent = "Sealed. Share the text and the passphrase separately.";
+      $("s-out").textContent = b64; show("s-out", true); show("s-copy", true); show("s-save", true);
+      $("s-status").textContent = "Sealed. Send this text and the passphrase by two different routes.";
     }).catch(function (e) { $("s-status").textContent = "Could not seal: " + e.message; });
+  };
+  $("s-save").onclick = function () {
+    var b64 = $("s-out").textContent;
+    if (!b64) return;
+    var blob = new Blob([b64], { type: "text/plain" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "seance-note.txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    $("s-status").textContent = "Saved as seance-note.txt. Send the file and the passphrase separately.";
   };
   $("s-copy").onclick = function () {
     navigator.clipboard && navigator.clipboard.writeText($("s-out").textContent).then(function () { $("s-status").textContent = "Copied."; });
   };
-  $("s-clear").onclick = function () { $("s-text").value = ""; $("s-pass").value = ""; $("s-out").textContent = ""; show("s-out", false); show("s-copy", false); $("s-status").textContent = ""; };
+  $("s-clear").onclick = function () { $("s-text").value = ""; $("s-pass").value = ""; $("s-out").textContent = ""; show("s-out", false); show("s-copy", false); show("s-save", false); $("s-status").textContent = ""; };
 
   // open
+  $("o-file").onchange = function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () { $("o-text").value = String(r.result).trim(); $("o-status").textContent = "Loaded " + f.name + " — add the passphrase."; };
+    r.readAsText(f);
+  };
   var used = Loom.storage.get("opened", false);
   show("o-once", used);
   $("open").onclick = function () {
