@@ -45,11 +45,11 @@
       "at": "2026-11-10T14:06:20Z"
     },
     "docs/shot.png": {
-      "sha": "d7944f9a24646bc0d298254a744a32367a5883ce",
-      "producer": "cdp capture",
-      "class": "generated",
-      "at": "2026-11-10T14:10:11Z"
+      "sha": "e262d689f2f6a2c74bc00b49c44f02401007ecf3",
+      "producer": "human",
+      "class": "hand",
+      "at": "2026-11-14T18:06:53Z"
     }
   },
-  "updated": "2026-11-10T15:13:48Z"
+  "updated": "2026-11-14T18:06:53Z"
 }
